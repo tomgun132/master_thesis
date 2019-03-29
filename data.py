@@ -5,7 +5,7 @@ import re
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
-from feature_extractore import RationalesFeature,readTaggingResults, userAbilities
+from feature_extractore import RationalesFeature
 stopwords_list = stopwords.words("english")
 stopwords_list.remove('not')
 
@@ -157,76 +157,5 @@ def getTrainTest(type):
 		x_sents_test = vectorizer.transform(test_)
 		x_train = feat_extractor.extract_features(x_sents_train, train_, review_len_train, y_train, reviewer_train, types = 'user_model')
 		x_test = feat_extractor.extract_features(x_sents_test, test_, review_len_test, y_test, reviewer_test, types = 'user_model')
-	elif type == 3:	
-		results_reviewer, result_ID = readTaggingResultsMaxent()
-		reviewer_train = []
-		reviewer_test = []
-		for item in train:
-			for tuple in item:
-				sent_labels = result_ID[tuple[1]]
-				review_text = tuple[0]
-				for label in sent_labels:
-					l = label.split("_")[0]
-					review_text += ' %s_sentence'%l
-				reviewer_train.append(tuple[1].split('_')[0])
-				train_.append(review_text)
-				y_train.append(tuple[2])
-		for item in test:
-			for tuple in item:
-				sent_labels = result_ID[tuple[1]]
-				review_text = tuple[0]
-				for label in sent_labels:
-					l = label.split("_")[0]
-					review_text += ' %s_sentence'%l
-				reviewer_test.append(tuple[1].split('_')[0])
-				test_.append(review_text)
-				y_test.append(tuple[2])
-				title_test.append(tuple[3])
-		x_train = vectorizer.fit_transform(train_)
-		x_test = vectorizer.transform(test_)
-	elif type == 4:
-		results_reviewer, result_ID = readTaggingResultsMaxent()
-		user_score = userAbilities(results_reviewer)
-		printOnce = False
-		reviewer_train = []
-		reviewer_test = []
-		for item in train:
-			for tuple in item:
-				sent_labels = result_ID[tuple[1]]
-				reviewer = tuple[1].split('_')[0]
-				sents = nltk.sent_tokenize(tuple[0])
-				review_text = tuple[0]
-				if user_score[reviewer][0] > 0: ability = 'high'
-				else: ability = 'low'
-				for label in sent_labels:
-					l,i = label.split("_")
-					review_text += ' %s_%s_sentence'%(ability,l)
-					for word in sents[int(i)].split(' '):
-						review_text += ' %s_%s'%(ability,word)
-				if not printOnce:
-					print sent_labels
-					print review_text
-					printOnce = True
-				reviewer_train.append(tuple[1].split('_')[0])
-				train_.append(review_text)
-				y_train.append(tuple[2])
-		for item in test:
-			for tuple in item:
-				sent_labels = result_ID[tuple[1]]
-				sents = nltk.sent_tokenize(tuple[0])
-				reviewer = tuple[1].split('_')[0]
-				review_text = tuple[0]
-				if user_score[reviewer][0] > 0: ability = 'high'
-				else: ability = 'low'
-				for label in sent_labels:
-					l,i = label.split("_")
-					review_text += ' %s_%s_sentence'%(ability,l)
-					for word in sents[int(i)].split(' '):
-						review_text += ' %s_%s'%(ability,word)
-				reviewer_test.append(tuple[1].split('_')[0])
-				test_.append(review_text)
-				y_test.append(tuple[2])
-				title_test.append(tuple[3])
-		x_train = vectorizer.fit_transform(train_)
-		x_test = vectorizer.transform(test_)
+
 	return x_train, y_train, x_test, y_test  
